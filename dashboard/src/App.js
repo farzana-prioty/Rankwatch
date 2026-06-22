@@ -1,0 +1,131 @@
+import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import axios from "axios";
+import "./App.css";
+
+const API = "http://localhost:3001";
+
+export default function App() {
+  const [dark, setDark] = useState(false);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [sessions, setSessions] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${API}/api/leaderboard`).then(r => setLeaderboard(r.data));
+    axios.get(`${API}/api/sessions`).then(r => {
+      setSessions(r.data);
+      const counts = {};
+      r.data.forEach(s => { counts[s.game] = (counts[s.game] || 0) + 1; });
+      setChartData(Object.entries(counts).map(([game, count]) => ({ game, count })));
+    });
+  }, []);
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const t = dark ? "dark" : "light";
+
+  return (
+    <div className={`app ${t}`}>
+      <aside className="sidebar">
+        <div className="logo">⚔️ Rankwatch</div>
+        <span className="nav-section">Menu</span>
+        <div className="nav-item active">🏠 Dashboard</div>
+        <div className="nav-item">📊 Stats</div>
+        <div className="nav-item">👥 Players</div>
+        <div className="nav-item">🕐 Sessions</div>
+        <span className="nav-section">System</span>
+        <div className="nav-item">⚙️ Settings</div>
+        <div className="theme-toggle" onClick={() => setDark(!dark)}>
+          {dark ? "☀️ Light mode" : "🌙 Dark mode"}
+        </div>
+      </aside>
+
+      <main className="main">
+        <div className="topbar">
+          <h1>Dashboard</h1>
+          <div className="badge"><span className="dot" />Rankwatch online</div>
+        </div>
+
+        <div className="stats-row">
+          <div className="stat-card accent">
+            <div className="stat-label">🎮 Total sessions</div>
+            <div className="stat-value">{sessions.length}</div>
+            <div className="stat-sub">all time</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">🏆 Top player</div>
+            <div className="stat-value sm">{leaderboard[0]?.username || "—"}</div>
+            <div className="stat-sub pink">{leaderboard[0]?.wins} wins</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">🔥 Most played</div>
+            <div className="stat-value sm">{chartData[0]?.game || "—"}</div>
+            <div className="stat-sub">{chartData[0]?.count} sessions</div>
+          </div>
+        </div>
+
+        <div className="bottom-row">
+          <div className="card">
+            <div className="card-title">📊 Sessions by game</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <XAxis dataKey="game" tick={{ fontSize: 12, fontWeight: 600, fill: dark ? "#a89cc8" : "#4b3a7a" }} />
+                <YAxis tick={{ fontSize: 11, fill: dark ? "#a89cc8" : "#9b8bb5" }} />
+                <Tooltip
+                  contentStyle={{
+                    background: dark ? "#1a1630" : "#fff",
+                    border: "0.5px solid",
+                    borderColor: dark ? "#4a3fa0" : "#e8e0f5",
+                    borderRadius: 8,
+                    color: dark ? "#f0e6ff" : "#2d1f4e"
+                  }}
+                />
+                <Bar dataKey="count" fill={dark ? "#7c3aed" : "#a855f7"} radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="card">
+            <div className="card-title">🏆 Leaderboard</div>
+            <table className="table">
+              <thead>
+                <tr><th>#</th><th>Player</th><th>W</th></tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((p, i) => (
+                  <tr key={p.username}>
+                    <td>{medals[i] || i + 1}</td>
+                    <td>
+                      <span className="avatar">{p.username[0].toUpperCase()}</span>
+                      {p.username}
+                    </td>
+                    <td className="wins">{p.wins}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: 12 }}>
+          <div className="card-title">🕐 Recent sessions</div>
+          <table className="table">
+            <thead>
+              <tr><th>Player</th><th>Game</th><th>Result</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              {sessions.slice(0, 8).map(s => (
+                <tr key={s.id}>
+                  <td><span className="avatar">{s.username[0].toUpperCase()}</span>{s.username}</td>
+                  <td>{s.game}</td>
+                  <td><span className={`pill ${s.result}`}>{s.result}</span></td>
+                  <td>{new Date(s.played_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  );
+}
