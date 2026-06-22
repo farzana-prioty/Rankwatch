@@ -168,3 +168,85 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .dark .win { background: #14261f; color: #86efac; }
 .dark .loss { background: #2a1515; color: #fca5a5; }
 .dark .draw { background: #1e1a30; color: #a89cc8; }
+
+.log-btn {
+  background: linear-gradient(135deg, #a855f7, #db2777);
+  color: #fff;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 31, 78, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  border-radius: 14px;
+  padding: 1.25rem;
+  width: 280px;
+  border: 0.5px solid #e0c9f7;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-title { font-size: 14px; font-weight: 700; }
+.modal-x { font-size: 16px; cursor: pointer; color: #c4aee8; }
+
+.field { margin-bottom: 8px; }
+.field label {
+  font-size: 10px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.field input, .field select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  border: 0.5px solid #e0c9f7;
+}
+
+.modal-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #a855f7, #db2777);
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.light .modal { background: #fff; }
+.light .modal-title { color: #7c3aed; }
+.light .field label { color: #9b6dca; }
+.light .field input, .light .field select { background: #faf8ff; color: #2d1f4e; }
+
+.dark .modal { background: #1a1630; border-color: #4a3fa0; }
+.dark .modal-title { color: #d8b4fe; }
+.dark .field label { color: #c084fc; }
+.dark .field input, .dark .field select { background: #12101e; color: #f0e6ff; border-color: #4a3fa0; }

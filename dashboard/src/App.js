@@ -10,6 +10,9 @@ export default function App() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ username: "", game: "", result: "win" });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/api/leaderboard`).then(r => setLeaderboard(r.data));
@@ -23,6 +26,28 @@ export default function App() {
 
   const medals = ["🥇", "🥈", "🥉"];
   const t = dark ? "dark" : "light";
+
+  const logSession = async () => {
+  if (!form.username || !form.game) return;
+  setSubmitting(true);
+  try {
+    await axios.post(`${API}/api/sessions`, form);
+    const [lb, sess] = await Promise.all([
+      axios.get(`${API}/api/leaderboard`),
+      axios.get(`${API}/api/sessions`)
+    ]);
+    setLeaderboard(lb.data);
+    setSessions(sess.data);
+    const counts = {};
+    sess.data.forEach(s => { counts[s.game] = (counts[s.game] || 0) + 1; });
+    setChartData(Object.entries(counts).map(([game, count]) => ({ game, count })));
+    setForm({ username: "", game: "", result: "win" });
+    setShowModal(false);
+  } catch (err) {
+    console.error(err);
+  }
+  setSubmitting(false);
+};
 
   return (
     <div className={`app ${t}`}>
@@ -42,9 +67,12 @@ export default function App() {
 
       <main className="main">
         <div className="topbar">
-          <h1>Dashboard</h1>
-          <div className="badge"><span className="dot" />Rankwatch online</div>
-        </div>
+  <h1>Dashboard</h1>
+  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+    <button className="log-btn" onClick={() => setShowModal(true)}>+ Log session</button>
+    <div className="badge"><span className="dot" />Rankwatch online</div>
+  </div>
+</div>
 
         <div className="stats-row">
           <div className="stat-card accent">
@@ -126,6 +154,46 @@ export default function App() {
           </table>
         </div>
       </main>
+      {showModal && (
+  <div className="modal-overlay" onClick={() => setShowModal(false)}>
+    <div className={`modal ${t}`} onClick={e => e.stopPropagation()}>
+      <div className="modal-header">
+        <span className="modal-title">Log a session</span>
+        <span className="modal-x" onClick={() => setShowModal(false)}>✕</span>
+      </div>
+      <div className="field">
+        <label>Username</label>
+        <input
+          placeholder="e.g. sienna95"
+          value={form.username}
+          onChange={e => setForm({ ...form, username: e.target.value })}
+        />
+      </div>
+      <div className="field">
+        <label>Game</label>
+        <input
+          placeholder="e.g. Valorant"
+          value={form.game}
+          onChange={e => setForm({ ...form, game: e.target.value })}
+        />
+      </div>
+      <div className="field">
+        <label>Result</label>
+        <select
+          value={form.result}
+          onChange={e => setForm({ ...form, result: e.target.value })}
+        >
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+          <option value="draw">Draw</option>
+        </select>
+      </div>
+      <button className="modal-btn" onClick={logSession} disabled={submitting}>
+        {submitting ? "Logging..." : "Log session"}
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

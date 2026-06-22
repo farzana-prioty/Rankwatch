@@ -73,6 +73,16 @@ app.get('/api/sessions', async (req, res) => {
   res.json(data);
 });
 
+app.post('/api/sessions', async (req, res) => {
+  const { username, game, result } = req.body;
+  const { data, error } = await supabase
+    .from('sessions')
+    .insert({ username, game, result, played_at: new Date() })
+    .select();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data[0]);
+});
+
 app.listen(PORT, () => {
   console.log(`✅ API running at http://localhost:${PORT}`);
 });
