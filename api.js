@@ -19,26 +19,6 @@ const supabase = createClient(
   }
 );
 
-app.get('/api/leaderboard', async (req, res) => {
-  const { data, error } = await supabase
-    .from('sessions')
-    .select('username, result');
-
-  if (error) return res.status(500).json({ error: error.message });
-
-  const counts = {};
-  data.forEach(s => {
-    if (s.result === 'win') {
-      counts[s.username] = (counts[s.username] || 0) + 1;
-    }
-  });
-
-  const leaderboard = Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([username, wins]) => ({ username, wins }));
-
-  res.json(leaderboard);
-});
 
 app.get('/api/stats/:username', async (req, res) => {
   const { username } = req.params;
@@ -81,6 +61,28 @@ app.post('/api/sessions', async (req, res) => {
     .select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
+});
+
+app.get('/api/leaderboard', async (req, res) => {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('username, result');
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const counts = {};
+  data.forEach(s => {
+    if (!counts[s.username]) counts[s.username] = { wins: 0, losses: 0, draws: 0 };
+    if (s.result === 'win') counts[s.username].wins++;
+    if (s.result === 'loss') counts[s.username].losses++;
+    if (s.result === 'draw') counts[s.username].draws++;
+  });
+
+  const leaderboard = Object.entries(counts)
+    .sort((a, b) => b[1].wins - a[1].wins)
+    .map(([username, stats]) => ({ username, ...stats }));
+
+  res.json(leaderboard);
 });
 
 app.listen(PORT, () => {

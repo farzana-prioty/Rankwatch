@@ -6,7 +6,9 @@ import "./App.css";
 const API = "http://localhost:3001";
 
 export default function App() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => {
+  return localStorage.getItem('theme') === 'dark';
+});
   const [leaderboard, setLeaderboard] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -96,15 +98,26 @@ const logSession = async () => {
         <div className="nav-item">🕐 Sessions</div>
         <span className="nav-section">System</span>
         <div className="nav-item">⚙️ Settings</div>
-        <div className="theme-toggle" onClick={() => setDark(!dark)}>
+        {/* <div className="theme-toggle" onClick={() => {
+  const next = !dark;
+  setDark(next);
+  localStorage.setItem('theme', next ? 'dark' : 'light');
+}}>
           {dark ? "☀️ Light mode" : "🌙 Dark mode"}
-        </div>
+        </div> */}
       </aside>
 
       <main className="main">
-        <div className="topbar">
+      <div className="topbar">
   <h1>Dashboard</h1>
   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+    <button className="theme-btn" onClick={() => {
+      const next = !dark;
+      setDark(next);
+      localStorage.setItem('theme', next ? 'dark' : 'light');
+    }}>
+      {dark ? "☀️ Light" : "🌙 Dark"}
+    </button>
     <button className="log-btn" onClick={() => setShowModal(true)}>+ Log session</button>
     <div className="badge"><span className="dot" />Rankwatch online</div>
   </div>
@@ -149,26 +162,28 @@ const logSession = async () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="card">
-            <div className="card-title">🏆 Leaderboard</div>
-            <table className="table">
-              <thead>
-                <tr><th>#</th><th>Player</th><th>W</th></tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((p, i) => (
-                  <tr key={p.username}>
-                    <td>{medals[i] || i + 1}</td>
-                    <td>
-                      <span className="avatar">{p.username[0].toUpperCase()}</span>
-                      {p.username}
-                    </td>
-                    <td className="wins">{p.wins}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+         <div className="card">
+  <div className="card-title">🏆 Leaderboard</div>
+  <table className="table">
+    <thead>
+      <tr><th>#</th><th>Player</th><th>W</th><th>L</th><th>D</th></tr>
+    </thead>
+    <tbody>
+      {leaderboard.map((p, i) => (
+        <tr key={p.username}>
+          <td>{medals[i] || i + 1}</td>
+          <td>
+            <span className="avatar">{p.username[0].toUpperCase()}</span>
+            {p.username}
+          </td>
+          <td className="wins">{p.wins}</td>
+          <td className="losses">{p.losses}</td>
+          <td className="draws">{p.draws}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
         </div>
 
         <div className="card" style={{ marginTop: 12 }}>
