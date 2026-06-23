@@ -13,6 +13,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ username: "", game: "", result: "win" });
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     axios.get(`${API}/api/leaderboard`).then(r => setLeaderboard(r.data));
@@ -43,6 +44,8 @@ export default function App() {
     setChartData(Object.entries(counts).map(([game, count]) => ({ game, count })));
     setForm({ username: "", game: "", result: "win" });
     setShowModal(false);
+    setToast("✅ Session logged!");
+    setTimeout(() => setToast(""), 3000); 
   } catch (err) {
     console.error(err);
   }
@@ -194,6 +197,7 @@ export default function App() {
     </div>
   </div>
 )}
+{toast && <div className="toast">{toast}</div>}
     </div>
   );
 }
