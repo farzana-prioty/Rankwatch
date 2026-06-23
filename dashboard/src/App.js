@@ -14,6 +14,7 @@ export default function App() {
   const [form, setForm] = useState({ username: "", game: "", result: "win" });
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
+  const [formErrors, setFormErrors] = useState({ username: "", game: "" });
 
   useEffect(() => {
     axios.get(`${API}/api/leaderboard`).then(r => setLeaderboard(r.data));
@@ -28,8 +29,40 @@ export default function App() {
   const medals = ["🥇", "🥈", "🥉"];
   const t = dark ? "dark" : "light";
 
-  const logSession = async () => {
-  if (!form.username || !form.game) return;
+//   const logSession = async () => {
+//   if (!form.username || !form.game) return;
+//   setSubmitting(true);
+//   try {
+//     await axios.post(`${API}/api/sessions`, form);
+//     const [lb, sess] = await Promise.all([
+//       axios.get(`${API}/api/leaderboard`),
+//       axios.get(`${API}/api/sessions`)
+//     ]);
+//     setLeaderboard(lb.data);
+//     setSessions(sess.data);
+//     const counts = {};
+//     sess.data.forEach(s => { counts[s.game] = (counts[s.game] || 0) + 1; });
+//     setChartData(Object.entries(counts).map(([game, count]) => ({ game, count })));
+//     setForm({ username: "", game: "", result: "win" });
+//     setShowModal(false);
+//     setToast("✅ Session logged!");
+//     setTimeout(() => setToast(""), 3000); 
+//   } catch (err) {
+//     console.error(err);
+//   }
+//   setSubmitting(false);
+// };
+const logSession = async () => {
+  const errors = { username: "", game: "" };
+  if (!form.username.trim()) errors.username = "Please enter a username.";
+  if (!form.game.trim()) errors.game = "Please enter a game name.";
+  
+  if (errors.username || errors.game) {
+    setFormErrors(errors);
+    return;
+  }
+
+  setFormErrors({ username: "", game: "" });
   setSubmitting(true);
   try {
     await axios.post(`${API}/api/sessions`, form);
@@ -45,7 +78,7 @@ export default function App() {
     setForm({ username: "", game: "", result: "win" });
     setShowModal(false);
     setToast("✅ Session logged!");
-    setTimeout(() => setToast(""), 3000); 
+    setTimeout(() => setToast(""), 3000);
   } catch (err) {
     console.error(err);
   }
@@ -165,21 +198,32 @@ export default function App() {
         <span className="modal-x" onClick={() => setShowModal(false)}>✕</span>
       </div>
       <div className="field">
-        <label>Username</label>
-        <input
-          placeholder="e.g. sienna95"
-          value={form.username}
-          onChange={e => setForm({ ...form, username: e.target.value })}
-        />
-      </div>
-      <div className="field">
-        <label>Game</label>
-        <input
-          placeholder="e.g. Valorant"
-          value={form.game}
-          onChange={e => setForm({ ...form, game: e.target.value })}
-        />
-      </div>
+  <label>Username</label>
+  <input
+    placeholder="e.g. sienna95"
+    value={form.username}
+    className={formErrors.username ? "empty" : ""}
+    onChange={e => {
+      setForm({ ...form, username: e.target.value });
+      setFormErrors({ ...formErrors, username: "" });
+    }}
+  />
+  {formErrors.username && <div className="field-error">{formErrors.username}</div>}
+</div>
+
+<div className="field">
+  <label>Game</label>
+  <input
+    placeholder="e.g. Valorant"
+    value={form.game}
+    className={formErrors.game ? "empty" : ""}
+    onChange={e => {
+      setForm({ ...form, game: e.target.value });
+      setFormErrors({ ...formErrors, game: "" });
+    }}
+  />
+  {formErrors.game && <div className="field-error">{formErrors.game}</div>}
+</div>
       <div className="field">
         <label>Result</label>
         <select
