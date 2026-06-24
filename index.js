@@ -17,9 +17,11 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === 'stats') {
-    const game = interaction.options.getString('game');
+    const rawGame = interaction.options.getString('game');
     const result = interaction.options.getString('result');
-
+    const game = rawGame
+      ? rawGame.trim().charAt(0).toUpperCase() + rawGame.trim().slice(1).toLowerCase()
+      : rawGame;
     const { error } = await supabase.from('sessions').insert({
       discord_user_id: interaction.user.id,
       username: interaction.user.username,
@@ -64,7 +66,10 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.commandName === 'nowplaying') {
-    const game = interaction.options.getString('game');
+    const rawGame = interaction.options.getString('game');
+    const game = rawGame
+      ? rawGame.trim().charAt(0).toUpperCase() + rawGame.trim().slice(1).toLowerCase()
+      : rawGame;
     await interaction.reply(`🎮 **${interaction.user.username}** is now playing **${game}**`);
   }
 });

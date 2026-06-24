@@ -55,9 +55,12 @@ app.get('/api/sessions', async (req, res) => {
 
 app.post('/api/sessions', async (req, res) => {
   const { username, game, result } = req.body;
+  const formattedGame = game
+    ? game.trim().charAt(0).toUpperCase() + game.trim().slice(1).toLowerCase()
+    : game;
   const { data, error } = await supabase
     .from('sessions')
-    .insert({ username, game, result, played_at: new Date() })
+    .insert({ username, game: formattedGame, result, played_at: new Date() })
     .select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
