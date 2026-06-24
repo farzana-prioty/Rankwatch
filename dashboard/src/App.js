@@ -17,6 +17,12 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
   const [formErrors, setFormErrors] = useState({ username: "", game: "" });
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+  const timer = setInterval(() => setNow(new Date()), 1000);
+  return () => clearInterval(timer);
+}, []);
 
   useEffect(() => {
     axios.get(`${API}/api/leaderboard`).then(r => setLeaderboard(r.data));
@@ -30,6 +36,9 @@ export default function App() {
 
   const medals = ["🥇", "🥈", "🥉"];
   const t = dark ? "dark" : "light";
+  const clockStr = now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) +
+  " · " +
+  now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" });
 
 //   const logSession = async () => {
 //   if (!form.username || !form.game) return;
@@ -111,6 +120,7 @@ const logSession = async () => {
       <div className="topbar">
   <h1>Dashboard</h1>
   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+    <div className="clock">{clockStr}</div>
     <button className="theme-btn" onClick={() => {
       const next = !dark;
       setDark(next);

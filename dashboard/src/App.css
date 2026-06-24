@@ -296,3 +296,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
 .losses { color: #ef4444; font-weight: 700; }
 .draws { color: #f59e0b; font-weight: 700; }
+
+.clock {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.light .clock { color: #6b5b8a; }
+.dark .clock { color: #8b7db5; }
