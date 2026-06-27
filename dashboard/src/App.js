@@ -18,6 +18,8 @@ export default function App() {
   const [toast, setToast] = useState("");
   const [formErrors, setFormErrors] = useState({ username: "", game: "" });
   const [now, setNow] = useState(new Date());
+  const [expandedUser, setExpandedUser] = useState(null);
+  const [userStats, setUserStats] = useState({});
 
   useEffect(() => {
   const timer = setInterval(() => setNow(new Date()), 1000);
@@ -40,29 +42,6 @@ export default function App() {
   " · " +
   now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" });
 
-//   const logSession = async () => {
-//   if (!form.username || !form.game) return;
-//   setSubmitting(true);
-//   try {
-//     await axios.post(`${API}/api/sessions`, form);
-//     const [lb, sess] = await Promise.all([
-//       axios.get(`${API}/api/leaderboard`),
-//       axios.get(`${API}/api/sessions`)
-//     ]);
-//     setLeaderboard(lb.data);
-//     setSessions(sess.data);
-//     const counts = {};
-//     sess.data.forEach(s => { counts[s.game] = (counts[s.game] || 0) + 1; });
-//     setChartData(Object.entries(counts).map(([game, count]) => ({ game, count })));
-//     setForm({ username: "", game: "", result: "win" });
-//     setShowModal(false);
-//     setToast("✅ Session logged!");
-//     setTimeout(() => setToast(""), 3000); 
-//   } catch (err) {
-//     console.error(err);
-//   }
-//   setSubmitting(false);
-// };
 const logSession = async () => {
   const errors = { username: "", game: "" };
   if (!form.username.trim()) errors.username = "Please enter a username.";
@@ -96,6 +75,18 @@ const logSession = async () => {
   setSubmitting(false);
 };
 
+const toggleUser = async (username) => {
+  if (expandedUser === username) {
+    setExpandedUser(null);
+    return;
+  }
+  setExpandedUser(username);
+  if (!userStats[username]) {
+    const res = await axios.get(`${API}/api/stats/${username}`);
+    setUserStats(prev => ({ ...prev, [username]: res.data }));
+  }
+};
+
   return (
     <div className={`app ${t}`}>
       <aside className="sidebar">
@@ -107,13 +98,6 @@ const logSession = async () => {
         <div className="nav-item">🕐 Sessions</div>
         <span className="nav-section">System</span>
         <div className="nav-item">⚙️ Settings</div>
-        {/* <div className="theme-toggle" onClick={() => {
-  const next = !dark;
-  setDark(next);
-  localStorage.setItem('theme', next ? 'dark' : 'light');
-}}>
-          {dark ? "☀️ Light mode" : "🌙 Dark mode"}
-        </div> */}
       </aside>
 
       <main className="main">
@@ -178,20 +162,41 @@ const logSession = async () => {
     <thead>
       <tr><th>#</th><th>Player</th><th>W</th><th>L</th><th>D</th></tr>
     </thead>
-    <tbody>
-      {leaderboard.map((p, i) => (
-        <tr key={p.username}>
-          <td>{medals[i] || i + 1}</td>
-          <td>
-            <span className="avatar">{p.username[0].toUpperCase()}</span>
-            {p.username}
+<tbody>
+  {leaderboard.map((p, i) => (
+    <>
+      <tr key={p.username} className="player-row" onClick={() => toggleUser(p.username)}>
+        <td>{medals[i] || i + 1}</td>
+        <td>
+          <span className="avatar">{p.username[0].toUpperCase()}</span>
+          {p.username}
+          <span className={`chevron ${expandedUser === p.username ? "open" : ""}`}>▼</span>
+        </td>
+        <td className="wins">{p.wins}</td>
+        <td className="losses">{p.losses}</td>
+        <td className="draws">{p.draws}</td>
+      </tr>
+      {expandedUser === p.username && userStats[p.username] && (
+        <tr key={`${p.username}-stats`} className="expand-row">
+          <td colSpan="5">
+            <div className="game-breakdown">
+              {Object.entries(userStats[p.username].games || userStats[p.username]).map(([game, stats]) => (
+                <div key={game} className="game-row">
+                  <span className="game-name">{game}</span>
+                  <div className="game-stats">
+                    <span className="stat w">W {stats.wins}</span>
+                    <span className="stat l">L {stats.losses}</span>
+                    <span className="stat d">D {stats.draws}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </td>
-          <td className="wins">{p.wins}</td>
-          <td className="losses">{p.losses}</td>
-          <td className="draws">{p.draws}</td>
         </tr>
-      ))}
-    </tbody>
+      )}
+    </>
+  ))}
+</tbody>
   </table>
 </div>
         </div>

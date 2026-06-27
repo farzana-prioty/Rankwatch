@@ -304,5 +304,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   white-space: nowrap;
 }
 
+.player-row { cursor: pointer; }
+.player-row:hover td { background: rgba(168, 85, 247, 0.05); }
+
+.chevron { font-size: 10px; color: #c4aee8; margin-left: 6px; display: inline-block; transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+
+.player-row { cursor: pointer; }
+.player-row:hover td { background: rgba(168, 85, 247, 0.05); }
+
+.chevron { font-size: 10px; color: #c4aee8; margin-left: 6px; display: inline-block; transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+
+.game-breakdown { padding: 0; }
+.game-row { display: grid; grid-template-columns: 48px 1fr 40px 40px 40px; align-items: center; padding: 6px 8px; border-bottom: 0.5px solid #f0e8fb; font-size: 12px; gap: 0; }
+.game-row:last-child { border-bottom: none; }
+.game-name { color: #2d1f4e; font-weight: 600; text-align: left; grid-column: 2; }
+.game-stats { display: contents; }
+.stat { text-align: center; font-size: 11px; font-weight: 700; }
+.stat.w { color: #a855f7; }
+.stat.l { color: #ef4444; }
+.stat.d { color: #f59e0b; }
+
+.light .game-breakdown { background: #faf8ff; }
+.dark .game-breakdown { background: #1a1630; }
+.dark .game-name { color: #e2d9f3; }
+.dark .game-row { border-bottom-color: #2a2440; }
+
 .light .clock { color: #6b5b8a; }
 .dark .clock { color: #8b7db5; }
